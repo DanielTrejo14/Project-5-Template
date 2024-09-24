@@ -122,11 +122,47 @@ def delete_recipe(id):
     return jsonify({'message': 'Recipe deleted successfully'}), 200
 
 
+@app.route('/recipes/<int:recipe_id>/favorite', methods=['POST'])
+@login_required
+def favorite_recipe(recipe_id):
+    user_id = session['user_id']
+    user = User.query.get_or_404(user_id)
+    recipe = Recipe.query.get_or_404(recipe_id)
+
+
+    if recipe in user.favorite_recipes:
+        return jsonify({'message': 'Recipe already favorited'}), 400
+    
+
+    user.favorite_recipes.append(recipe)
+    db.session.commit()
+    return jsonify({'message': 'Recipe favorited successfully'}), 200
+
+
+@app.route('/categories', methods=['GET'])
+def get_categories():
+    categories = Category.query.all()
+    return jsonify([category.serialize() for category in categories])
 
 
 
 
+@app.route('/recipes/<int:recipe_id>/reviews', methods=['POST'])
+@login_required
+def create_review(recipe_id):
+    data = request.json
+    content = data.get('content')
+    rating = data.get('rating')
+    user_id = session['user_id']
 
+    if not content or not rating:
+        return jsonify({'error': 'Content and rating are required'}), 400
+    
+
+    review = Review(content=content, rating=rating, user_id=user_id, recipe_id=recipe_id)
+    db.session.add(review)
+    db.session.commit()
+    return jsonify({'message': 'Review created successfully', 'review': review.serialize()}), 201
 
 
 
