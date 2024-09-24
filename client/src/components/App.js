@@ -1,8 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { Switch, Route } from "react-router-dom";
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Login from './Login';
+import Recipes from './Recipes';
+import PrivateRoute from './PrivateRoute';
 
 function App() {
-  return <h1>Project Client</h1>;
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  return (
+    <Router>
+      <Switch>
+        <Route path="/login" component={Login} />
+        <PrivateRoute path="/recipes" component={Recipes} isAuthenticated={isAuthenticated} />
+      </Switch>
+    </Router>
+  );
 }
 
 export default App;
