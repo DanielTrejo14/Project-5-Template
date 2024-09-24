@@ -52,12 +52,83 @@ def create_user():
 @app.route('/login', method=['POST'])
 def login():
     data = request.json
-    
-    
+    email = data.get('email')
+    password = data.get('password')
+
+    user = User.query.filter_by(email=email).first()
+    if user is None or not user.check_password(password):
+        return jsonify({'error': 'Invalid email or password'}), 400
+
+
+    session['user_id'] = user.id
+    return jsonify({'message': 'Logged in successfully', 'user': user.serialize()}), 200
+
+
+
+@app.route('/logout', method=['POST'])
+def logout():
+    session.pop('user_id', None)
+    return jsonify({'message': 'Logged out successfully'}), 200
+
+
+
+@app.route('/recipes', methods=['POST'])
+@login_required
+def create_recipe():
+    data = request.json
+    title = data.get('title')
+    description = data.get('description')
+    user_id = session.get('user_id')
+
+    if not title or not description:
+        return jsonify({'error': 'Title and description are required'}), 400
+
+    recipe = Recipe(title=title, description=description, user_id=user_id)
+    db.session.add(recipe)
+    db.session.commit()
+    return jsonify({'message': 'Recipe created successfully', 'recipe': recipe.serialize()}), 201
+
+
+
+
+@app.route('/recipes', methods=['GET'])
+def get_recipe():
+    recipes = Recipe.query.all()
+    return jsonify([recipe.serialize() for recipe in recipes])
+
+@app.route('/recipes/<int:id>', methods=['GET'])
+def get_recipe(id):
+    recipe = Recipe.query.get_or_404(id)
+    return jsonify(recipe.serialize())
+
+
+@app.route('/recipes/<int:id>', methods=['PATCH'])
+@login_required
+def update_recipe(id):
+    recipe = Recipe.query.get_or_404(id)
+    data = request.json
+    recipe.title = data.get('title', recipe.title)
+    recipe.description = data.get('description', recipe.description)
+    db.session.commit()
+    return jsonify({'message': 'Recipe updated successfully', 'recipe': recipe.serialize()}), 200
+
+
+@app.route('/recipes/<int:id>', methods=['DELETE'])
+@login_required
+def delete_recipe(id):
+    recipe = Recipe.query.get_or_404(id)
+    db.session.delete(recipe)
+    db.session.commit()
+    return jsonify({'message': 'Recipe deleted successfully'}), 200
+
+
+
+
+
+
 
 
 
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
-
