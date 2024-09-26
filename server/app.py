@@ -165,6 +165,19 @@ def create_review(recipe_id):
     return jsonify({'message': 'Review created successfully', 'review': review.serialize()}), 201
 
 
+@app.route('/users/me', methods=['GET'])
+def get_current_user():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+
+    user = User.query.get_or_404(user_id)
+    return jsonify(user.serialize()), 200
+
+
+
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
