@@ -36,16 +36,16 @@ def seed():
         db.session.commit()
 
         
-        recipe1 = Recipe(title="Chocolate Cake", description="Delicious and moist chocolate cake.", author=user1)
+        recipe1 = Recipe(title="Chocolate Cake", description="Delicious and moist chocolate cake.", user_id=user1.id)
         recipe1.categories.extend([category1])
-        recipe2 = Recipe(title="Vegan Salad", description="Fresh and healthy vegan salad.", author=user2)
+        recipe2 = Recipe(title="Vegan Salad", description="Fresh and healthy vegan salad.", user_id=user2.id)
         recipe2.categories.extend([category2, category3])
 
         db.session.add_all([recipe1, recipe2])
         db.session.commit()
 
-        review1 = Review(content="Amazing cake!", rating=5, recipe=recipe1, reviewer=user2)
-        review2 = Review(content="Loved the freshness.", rating=4, recipe=recipe2, reviewer=user1)
+        review1 = Review(content="Amazing cake!", rating=5, recipe=recipe1, user_id=user2.id)
+        review2 = Review(content="Loved the freshness.", rating=4, recipe=recipe2, user_id=user1.id)
 
         db.session.add_all([review1, review2])
         db.session.commit()
