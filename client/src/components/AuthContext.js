@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await axios.get('/users/me'); // Create this endpoint
+                const response = await axios.get('/users/me'); 
                 setUser(response.data);
                 setIsAuthenticated(true);
             } catch (error) {

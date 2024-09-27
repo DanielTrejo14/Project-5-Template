@@ -15,7 +15,7 @@ const Register = () => {
         e.preventDefault();
         try {
             await axios.post('/users', { username, email, password });
-            history.push('/login'); // Redirect to login after successful registration
+            history.push('/login');
         } catch (error) {
             setError(error.response?.data?.error || 'Error during registration');
         }

@@ -18,6 +18,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <Navbar />
         <Switch>
           <Route path="/login">
             <Login setIsAuthenticated={setIsAuthenticated} />

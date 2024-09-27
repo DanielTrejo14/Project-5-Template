@@ -26,7 +26,7 @@ def login_required(f):
     return decorated_function
 
 
-@app.route('/users', method=['POST'])
+@app.route('/users', methods=['POST'])
 def create_user():
     data = request.json
     username = data.get('username')
@@ -49,7 +49,7 @@ def create_user():
 
 
 
-@app.route('/login', method=['POST'])
+@app.route('/login', methods=['POST'])
 def login():
     data = request.json
     email = data.get('email')
@@ -65,7 +65,7 @@ def login():
 
 
 
-@app.route('/logout', method=['POST'])
+@app.route('/logout', methods=['POST'])
 def logout():
     session.pop('user_id', None)
     return jsonify({'message': 'Logged out successfully'}), 200
@@ -97,7 +97,7 @@ def get_recipe():
     return jsonify([recipe.serialize() for recipe in recipes])
 
 @app.route('/recipes/<int:id>', methods=['GET'])
-def get_recipe(id):
+def get_recipe_by_id(id):
     recipe = Recipe.query.get_or_404(id)
     return jsonify(recipe.serialize())
 
