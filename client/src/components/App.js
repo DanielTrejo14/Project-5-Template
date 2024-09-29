@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Login from './Login';
-import Recipes from './Recipes';
 import PrivateRoute from './PrivateRoute';
 import RecipeList from './RecipeContainer/RecipeList';
 import RecipeDetail from './RecipeContainer/RecipeDetail';
 import CreateRecipe from './RecipeContainer/CreateRecipe';
 import Navbar from './NavBar';
 import { AuthProvider } from './AuthContext';
+import Register from './Register'
 
 
 

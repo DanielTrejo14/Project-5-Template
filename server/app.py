@@ -7,7 +7,7 @@ from flask import request, jsonify, session, Flask
 from functools import wraps
 # Local imports
 from config import app, db, api
-from models import User, Recipe, Review, Category
+
 
 
 # Views go here!

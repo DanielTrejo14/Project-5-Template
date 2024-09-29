@@ -9,7 +9,6 @@ from faker import Faker
 # Local imports
 from app import app
 
-from app import app
 from models import db, User, Recipe, Category, Review
 from werkzeug.security import generate_password_hash
 

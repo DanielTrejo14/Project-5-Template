@@ -3,7 +3,7 @@
 import React, { useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
-import { AuthContext } from '../contexts/AuthContext';
+import { AuthContext } from './AuthContext';
 
 const Navbar = () => {
     const { isAuthenticated, setIsAuthenticated, setUser } = useContext(AuthContext);
