@@ -1,15 +1,14 @@
-// frontend/src/components/Login.js
 
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './AuthContext'
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const history = useHistory();
+    const navigate = useNavigate();
     const { setIsAuthenticated, setUser } = useContext(AuthContext);
 
     const handleLogin = async (e) => {
@@ -18,7 +17,7 @@ const Login = () => {
             const response = await axios.post('/login', { email, password }, { withCredentials: true });
             setIsAuthenticated(true);
             setUser(response.data.user);
-            history.push('/recipes');
+            navigate.push('/recipes');
         } catch (error) {
             setError('Invalid email or password');
         }

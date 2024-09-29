@@ -1,20 +1,19 @@
-// frontend/src/components/Navbar.js
 
 import React, { useContext } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
 
 const Navbar = () => {
     const { isAuthenticated, setIsAuthenticated, setUser } = useContext(AuthContext);
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
             await axios.post('/logout', {}, { withCredentials: true });
             setIsAuthenticated(false);
             setUser(null);
-            history.push('/login');
+            navigate.push('/login');
         } catch (error) {
             console.error('Logout failed:', error);
         }

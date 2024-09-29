@@ -9,12 +9,9 @@ from functools import wraps
 from config import app, db, api
 
 
-
-# Views go here!
-
-@app.route('/')
-def index():
-    return '<h1>Project Server</h1>'
+#@app.route('/')
+#def index():
+   # return '<h1>Project Server</h1>'
 
 
 def login_required(f):
@@ -28,6 +25,7 @@ def login_required(f):
 
 @app.route('/users', methods=['POST'])
 def create_user():
+    from models import User
     data = request.json
     username = data.get('username')
     email = data.get('email')
@@ -51,6 +49,7 @@ def create_user():
 
 @app.route('/login', methods=['POST'])
 def login():
+    from models import User
     data = request.json
     email = data.get('email')
     password = data.get('password')
@@ -75,6 +74,7 @@ def logout():
 @app.route('/recipes', methods=['POST'])
 @login_required
 def create_recipe():
+    from models import Recipe
     data = request.json
     title = data.get('title')
     description = data.get('description')
@@ -93,11 +93,13 @@ def create_recipe():
 
 @app.route('/recipes', methods=['GET'])
 def get_recipe():
+    from models import Recipe
     recipes = Recipe.query.all()
     return jsonify([recipe.serialize() for recipe in recipes])
 
 @app.route('/recipes/<int:id>', methods=['GET'])
 def get_recipe_by_id(id):
+    from models import Recipe
     recipe = Recipe.query.get_or_404(id)
     return jsonify(recipe.serialize())
 
@@ -105,6 +107,7 @@ def get_recipe_by_id(id):
 @app.route('/recipes/<int:id>', methods=['PATCH'])
 @login_required
 def update_recipe(id):
+    from models import Recipe
     recipe = Recipe.query.get_or_404(id)
     data = request.json
     recipe.title = data.get('title', recipe.title)
@@ -116,6 +119,7 @@ def update_recipe(id):
 @app.route('/recipes/<int:id>', methods=['DELETE'])
 @login_required
 def delete_recipe(id):
+    from models import Recipe
     recipe = Recipe.query.get_or_404(id)
     db.session.delete(recipe)
     db.session.commit()
@@ -125,6 +129,8 @@ def delete_recipe(id):
 @app.route('/recipes/<int:recipe_id>/favorite', methods=['POST'])
 @login_required
 def favorite_recipe(recipe_id):
+    from models import Recipe
+    from models import User
     user_id = session['user_id']
     user = User.query.get_or_404(user_id)
     recipe = Recipe.query.get_or_404(recipe_id)
@@ -141,6 +147,7 @@ def favorite_recipe(recipe_id):
 
 @app.route('/categories', methods=['GET'])
 def get_categories():
+    from models import Category
     categories = Category.query.all()
     return jsonify([category.serialize() for category in categories])
 
@@ -150,6 +157,7 @@ def get_categories():
 @app.route('/recipes/<int:recipe_id>/reviews', methods=['POST'])
 @login_required
 def create_review(recipe_id):
+    from models import Review
     data = request.json
     content = data.get('content')
     rating = data.get('rating')
@@ -167,6 +175,7 @@ def create_review(recipe_id):
 
 @app.route('/users/me', methods=['GET'])
 def get_current_user():
+    from models import User
     user_id = session.get('user_id')
     if not user_id:
         return jsonify({'error': 'Not authenticated'}), 401

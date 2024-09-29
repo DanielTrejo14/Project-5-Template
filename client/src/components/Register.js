@@ -1,21 +1,20 @@
-// frontend/src/components/Register.js
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
             await axios.post('/users', { username, email, password });
-            history.push('/login');
+            navigate.push('/login');
         } catch (error) {
             setError(error.response?.data?.error || 'Error during registration');
         }

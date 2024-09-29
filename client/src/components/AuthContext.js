@@ -1,5 +1,3 @@
-// frontend/src/contexts/AuthContext.js
-
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -13,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await axios.get('/users/me'); 
+                const response = await axios.get('/users/me');
                 setUser(response.data);
                 setIsAuthenticated(true);
             } catch (error) {

@@ -2,19 +2,19 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const CreateRecipe = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [error, setError] = useState('');
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const handleCreateRecipe = async (e) => {
         e.preventDefault();
         try {
             await axios.post('/recipes', { title, description });
-            history.push('/recipes'); // Redirect to the recipe list after creation
+            navigate.push('/recipes');
         } catch (error) {
             setError('Error creating recipe');
         }
