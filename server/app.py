@@ -7,7 +7,12 @@ from flask import request, jsonify, session, Flask
 from functools import wraps
 # Local imports
 from config import app, db, api
+from models import User, Category, Review, Recipe
+import os
 
+
+
+app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
 
 #@app.route('/')
 #def index():
@@ -25,7 +30,7 @@ def login_required(f):
 
 @app.route('/users', methods=['POST'])
 def create_user():
-    from models import User
+    #from models import User
     data = request.json
     username = data.get('username')
     email = data.get('email')
@@ -49,7 +54,7 @@ def create_user():
 
 @app.route('/login', methods=['POST'])
 def login():
-    from models import User
+    #from models import User
     data = request.json
     email = data.get('email')
     password = data.get('password')
@@ -74,7 +79,7 @@ def logout():
 @app.route('/recipes', methods=['POST'])
 @login_required
 def create_recipe():
-    from models import Recipe
+    #from models import Recipe
     data = request.json
     title = data.get('title')
     description = data.get('description')
@@ -93,13 +98,13 @@ def create_recipe():
 
 @app.route('/recipes', methods=['GET'])
 def get_recipe():
-    from models import Recipe
+    #from models import Recipe
     recipes = Recipe.query.all()
     return jsonify([recipe.serialize() for recipe in recipes])
 
 @app.route('/recipes/<int:id>', methods=['GET'])
 def get_recipe_by_id(id):
-    from models import Recipe
+    #from models import Recipe
     recipe = Recipe.query.get_or_404(id)
     return jsonify(recipe.serialize())
 
@@ -107,7 +112,7 @@ def get_recipe_by_id(id):
 @app.route('/recipes/<int:id>', methods=['PATCH'])
 @login_required
 def update_recipe(id):
-    from models import Recipe
+    #from models import Recipe
     recipe = Recipe.query.get_or_404(id)
     data = request.json
     recipe.title = data.get('title', recipe.title)
@@ -119,7 +124,7 @@ def update_recipe(id):
 @app.route('/recipes/<int:id>', methods=['DELETE'])
 @login_required
 def delete_recipe(id):
-    from models import Recipe
+    #from models import Recipe
     recipe = Recipe.query.get_or_404(id)
     db.session.delete(recipe)
     db.session.commit()
@@ -129,8 +134,8 @@ def delete_recipe(id):
 @app.route('/recipes/<int:recipe_id>/favorite', methods=['POST'])
 @login_required
 def favorite_recipe(recipe_id):
-    from models import Recipe
-    from models import User
+    #from models import Recipe
+    #from models import User
     user_id = session['user_id']
     user = User.query.get_or_404(user_id)
     recipe = Recipe.query.get_or_404(recipe_id)
@@ -145,11 +150,57 @@ def favorite_recipe(recipe_id):
     return jsonify({'message': 'Recipe favorited successfully'}), 200
 
 
+@app.route('/categories', methods=['POST'])
+@login_required
+def create_category():
+    data = request.json
+    name = data.get('name')
+
+    if not name:
+        return jsonify({'error': 'Category name is required'}), 400
+
+    if Category.query.filter_by(name=name).first():
+        return jsonify({'error': 'Category already exists'}), 400
+
+    category = Category(name=name)
+    db.session.add(category)
+    db.session.commit()
+    return jsonify({'message': 'Category created successfully', 'category': category.serialize()}), 201
+
 @app.route('/categories', methods=['GET'])
 def get_categories():
-    from models import Category
     categories = Category.query.all()
-    return jsonify([category.serialize() for category in categories])
+    return jsonify([category.serialize() for category in categories]), 200
+
+@app.route('/categories/<int:id>', methods=['GET'])
+def get_category(id):
+    category = Category.query.get_or_404(id)
+    return jsonify(category.serialize()), 200
+
+@app.route('/categories/<int:id>', methods=['PATCH'])
+@login_required
+def update_category(id):
+    category = Category.query.get_or_404(id)
+    data = request.json
+    name = data.get('name')
+
+    if not name:
+        return jsonify({'error': 'Category name is required'}), 400
+
+    if Category.query.filter(Category.id != id, Category.name == name).first():
+        return jsonify({'error': 'Another category with this name already exists'}), 400
+
+    category.name = name
+    db.session.commit()
+    return jsonify({'message': 'Category updated successfully', 'category': category.serialize()}), 200
+
+@app.route('/categories/<int:id>', methods=['DELETE'])
+@login_required
+def delete_category(id):
+    category = Category.query.get_or_404(id)
+    db.session.delete(category)
+    db.session.commit()
+    return jsonify({'message': 'Category deleted successfully'}), 200
 
 
 
