@@ -3,6 +3,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import app, db
+from flask_login import UserMixin
 recipe_category = db.Table(
     'recipe_category',
     db.Column('recipe_id', db.Integer, db.ForeignKey('recipe.id'), primary_key=True),
@@ -18,7 +19,7 @@ favorites = db.Table(
 
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'user'  
 
     id = db.Column(db.Integer, primary_key=True)
@@ -49,7 +50,7 @@ class Category(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False, unique=True)
-
+    
     def serialize(self):
         return {
             'id': self.id,
@@ -67,8 +68,8 @@ class Recipe(db.Model):
     ingredients = db.Column(db.Text, nullable=True)  
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
 
+    
     categories = db.relationship('Category', secondary=recipe_category, backref='recipes')
     reviews = db.relationship('Review', back_populates='recipe', lazy=True)
 

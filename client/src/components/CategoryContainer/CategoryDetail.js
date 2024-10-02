@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
 
 const CategoryDetail = () => {
-    const { id } = useParams();  // Get category ID from URL
+    const { id } = useParams();  // Use useParams hook to get the dynamic route parameter
     const [category, setCategory] = useState(null);
     const [error, setError] = useState('');
 
@@ -11,7 +11,7 @@ const CategoryDetail = () => {
         const fetchCategory = async () => {
             try {
                 const response = await axios.get(`/categories/${id}`);
-                setCategory(response.data);  // Expect response to include category with recipes
+                setCategory(response.data);
             } catch (error) {
                 setError('Error fetching category details');
             }
@@ -24,28 +24,32 @@ const CategoryDetail = () => {
     if (!category) return <p>Loading...</p>;
 
     return (
-        <div>
-            <h1>{category.name}</h1>
-            <h3>Recipes in this category:</h3>
-            <ul>
+        <div style={styles.container}>
+            <h1 style={styles.title}>{category.name}</h1>
+
+            <h3 style={styles.subtitle}>Recipes in this category:</h3>
+            <ul style={styles.recipeList}>
                 {category.recipes && category.recipes.length > 0 ? (
                     category.recipes.map((recipe) => (
-                        <li key={recipe.id}>
-                            <Link to={`/recipes/${recipe.id}`}>{recipe.title}</Link>
+                        <li key={recipe.id} style={styles.recipeItem}>
+                            <Link to={`/recipes/${recipe.id}`} style={styles.link}>
+                                {recipe.title}
+                            </Link>
                         </li>
                     ))
                 ) : (
                     <p>No recipes found in this category.</p>
                 )}
             </ul>
-            <Link to={`/categories/update/${category.id}`}>Edit Category</Link>
+
+            <Link to={`/categories/update/${category.id}`} style={styles.editLink}>
+                Edit Category
+            </Link>
         </div>
     );
 };
 
-
-
-
+// Styling object
 const styles = {
     container: {
         maxWidth: '600px',

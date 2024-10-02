@@ -79,18 +79,23 @@ def logout():
 
 
 @app.route('/recipes', methods=['POST'])
-# @login_required
 def create_recipe():
-    #from models import Recipe
     data = request.get_json()
     title = data.get('title')
     description = data.get('description')
     user_id = data.get('user_id')
-    print(session)
+    category_id = data.get('category_id')  # Capture the category_id from the request
+
     if not title or not description:
         return jsonify({'error': 'Title and description are required'}), 400
 
-    recipe = Recipe(title=title, description=description, user_id=user_id)
+    # Find the category by its id
+    category = Category.query.get(category_id)
+    if not category:
+        return jsonify({'error': 'Category not found'}), 404
+
+    # Create the recipe with the category association
+    recipe = Recipe(title=title, description=description, user_id=user_id, category_id=category_id)
     db.session.add(recipe)
     db.session.commit()
     return jsonify({'message': 'Recipe created successfully', 'recipe': recipe.serialize()}), 201
@@ -180,13 +185,12 @@ def get_category(id):
     if not category:
         return jsonify({'error': 'Category not found'}), 404
 
-    # Assuming the Category model has a relationship with Recipe
     recipes = Recipe.query.filter_by(category_id=id).all()
 
     return jsonify({
         'id': category.id,
         'name': category.name,
-        'recipes': [recipe.serialize() for recipe in recipes]  # Include the recipes
+        'recipes': [recipe.serialize() for recipe in recipes] 
     })
 
 
