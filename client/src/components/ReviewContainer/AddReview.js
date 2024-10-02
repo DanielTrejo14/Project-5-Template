@@ -4,6 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
 
 const AddReview = ({ recipeId, onReviewAdded }) => {
+    const { user } = useContext(AuthContext);
     const [content, setContent] = useState('');
     const [rating, setRating] = useState(5);
     const [error, setError] = useState('');
@@ -17,7 +18,8 @@ const AddReview = ({ recipeId, onReviewAdded }) => {
         }
 
         try {
-            await axios.post(`/recipes/${recipeId}/reviews`, { content, rating }, { withCredentials: true });
+            console.log(user.__dict__)
+            await axios.post(`/recipes/${recipeId}/reviews`, { content, rating, user_id: user.id }, { withCredentials: true });
             setContent('');
             setRating(5);
             onReviewAdded();

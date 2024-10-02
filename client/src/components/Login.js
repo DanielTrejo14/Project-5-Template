@@ -1,55 +1,97 @@
+// client/src/components/Login.jsx
 
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import { AuthContext } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from './AuthContext'
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const { login } = useContext(AuthContext);
     const navigate = useNavigate();
-    const { setIsAuthenticated, setUser } = useContext(AuthContext);
+    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [error, setError] = useState(null);
 
-    const handleLogin = async (e) => {
+    const handleChange = (e) => {
+        setFormData(prevState => ({
+            ...prevState,
+            [e.target.name]: e.target.value,
+        }));
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const response = await axios.post('/login', { email, password }, { withCredentials: true });
-            setIsAuthenticated(true);
-            setUser(response.data.user);
-            navigate.push('/recipes');
-        } catch (error) {
-            setError('Invalid email or password');
+        const { email, password } = formData;
+        const result = await login(email, password);
+        if (result.success) {
+            navigate('/'); // Redirect after successful login
+        } else {
+            setError(result.message); // Set error message
         }
     };
 
     return (
-        <div>
-            <h1>Login</h1>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleLogin}>
-                <div>
-                    <label>Email</label>
+        <div style={styles.container}>
+            <h2>Login</h2>
+            {error && <p style={styles.error}>{error}</p>}
+            <form onSubmit={handleSubmit} style={styles.form}>
+                <div style={styles.formGroup}>
+                    <label htmlFor="email">Email:</label>
                     <input
                         type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        name="email"
+                        id="email"
+                        value={formData.email}
+                        onChange={handleChange}
                         required
+                        style={styles.input}
                     />
                 </div>
-                <div>
-                    <label>Password</label>
+                <div style={styles.formGroup}>
+                    <label htmlFor="password">Password:</label>
                     <input
                         type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        name="password"
+                        id="password"
+                        value={formData.password}
+                        onChange={handleChange}
                         required
+                        style={styles.input}
                     />
                 </div>
-                <button type="submit">Login</button>
+                <button type="submit" style={styles.button}>Login</button>
             </form>
         </div>
     );
+};
+
+const styles = {
+    container: {
+        maxWidth: '400px',
+        margin: '0 auto',
+        padding: '20px',
+        fontFamily: 'Arial, sans-serif',
+    },
+    form: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    formGroup: {
+        marginBottom: '15px',
+    },
+    input: {
+        width: '100%',
+        padding: '8px',
+        boxSizing: 'border-box',
+    },
+    button: {
+        padding: '10px',
+        backgroundColor: '#007bff',
+        color: '#fff',
+        border: 'none',
+        cursor: 'pointer',
+    },
+    error: {
+        color: 'red',
+    },
 };
 
 export default Login;

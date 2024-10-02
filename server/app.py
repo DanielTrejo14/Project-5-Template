@@ -19,13 +19,13 @@ app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
    # return '<h1>Project Server</h1>'
 
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user.id' not in session:
-            return jsonify({'error': 'You need to be logged in to access this resource'}), 403
-        return f(*args, **kwargs)
-    return decorated_function
+# def login_required(f):
+    # @wraps(f)
+    # def decorated_function(*args, **kwargs):
+    #     if 'user.id' not in session:
+    #         return jsonify({'error': 'You need to be logged in to access this resource'}), 403
+    #     return f(*args, **kwargs)
+    # return decorated_function
 
 
 @app.route('/users', methods=['POST'])
@@ -64,27 +64,29 @@ def login():
         return jsonify({'error': 'Invalid email or password'}), 400
 
 
-    session['user_id'] = user.id
+    # session['user_id'] = user.id
+    # print(session)
     return jsonify({'message': 'Logged in successfully', 'user': user.serialize()}), 200
 
 
 
-@app.route('/logout', methods=['POST'])
+@app.route('/logout', methods=['GET'])
 def logout():
-    session.pop('user_id', None)
+    # session.pop('user_id', None)
+    # print(session)
     return jsonify({'message': 'Logged out successfully'}), 200
 
 
 
 @app.route('/recipes', methods=['POST'])
-@login_required
+# @login_required
 def create_recipe():
     #from models import Recipe
-    data = request.json
+    data = request.get_json()
     title = data.get('title')
     description = data.get('description')
-    user_id = session.get('user_id')
-
+    user_id = data.get('user_id')
+    print(session)
     if not title or not description:
         return jsonify({'error': 'Title and description are required'}), 400
 
@@ -110,7 +112,7 @@ def get_recipe_by_id(id):
 
 
 @app.route('/recipes/<int:id>', methods=['PATCH'])
-@login_required
+# @login_required
 def update_recipe(id):
     #from models import Recipe
     recipe = Recipe.query.get_or_404(id)
@@ -122,7 +124,7 @@ def update_recipe(id):
 
 
 @app.route('/recipes/<int:id>', methods=['DELETE'])
-@login_required
+# @login_required
 def delete_recipe(id):
     #from models import Recipe
     recipe = Recipe.query.get_or_404(id)
@@ -132,7 +134,7 @@ def delete_recipe(id):
 
 
 @app.route('/recipes/<int:recipe_id>/favorite', methods=['POST'])
-@login_required
+# @login_required
 def favorite_recipe(recipe_id):
     #from models import Recipe
     #from models import User
@@ -151,7 +153,7 @@ def favorite_recipe(recipe_id):
 
 
 @app.route('/categories', methods=['POST'])
-@login_required
+# @login_required
 def create_category():
     data = request.json
     name = data.get('name')
@@ -174,11 +176,22 @@ def get_categories():
 
 @app.route('/categories/<int:id>', methods=['GET'])
 def get_category(id):
-    category = Category.query.get_or_404(id)
-    return jsonify(category.serialize()), 200
+    category = Category.query.get(id)
+    if not category:
+        return jsonify({'error': 'Category not found'}), 404
+
+    # Assuming the Category model has a relationship with Recipe
+    recipes = Recipe.query.filter_by(category_id=id).all()
+
+    return jsonify({
+        'id': category.id,
+        'name': category.name,
+        'recipes': [recipe.serialize() for recipe in recipes]  # Include the recipes
+    })
+
 
 @app.route('/categories/<int:id>', methods=['PATCH'])
-@login_required
+# @login_required
 def update_category(id):
     category = Category.query.get_or_404(id)
     data = request.json
@@ -195,7 +208,7 @@ def update_category(id):
     return jsonify({'message': 'Category updated successfully', 'category': category.serialize()}), 200
 
 @app.route('/categories/<int:id>', methods=['DELETE'])
-@login_required
+# @login_required
 def delete_category(id):
     category = Category.query.get_or_404(id)
     db.session.delete(category)
@@ -206,13 +219,13 @@ def delete_category(id):
 
 
 @app.route('/recipes/<int:recipe_id>/reviews', methods=['POST'])
-@login_required
+# @login_required
 def create_review(recipe_id):
-    from models import Review
+    # from models import Review
     data = request.json
     content = data.get('content')
     rating = data.get('rating')
-    user_id = session['user_id']
+    user_id = data.get('user_id')
 
     if not content or not rating:
         return jsonify({'error': 'Content and rating are required'}), 400
@@ -224,10 +237,9 @@ def create_review(recipe_id):
     return jsonify({'message': 'Review created successfully', 'review': review.serialize()}), 201
 
 
-@app.route('/users/me', methods=['GET'])
+@app.route('/current_user', methods=['GET'])
 def get_current_user():
-    from models import User
-    user_id = session.get('user_id')
+    user_id = session['user_id']
     if not user_id:
         return jsonify({'error': 'Not authenticated'}), 401
     

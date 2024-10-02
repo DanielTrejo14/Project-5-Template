@@ -21,16 +21,39 @@ function App() {
       <Router>
         <Navbar />
         <Routes>
-          <Route exact path="/" component={RecipeList} />
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <PrivateRoute path="/recipes/create" component={CreateRecipe} />
-          <PrivateRoute path="/categories/create" component={CreateCategory} />
-          <PrivateRoute path="/categories/update/:id" component={UpdateCategory} />
-          <Route path="/categories/:id" component={CategoryDetail} />
-          <Route path="/categories" component={CategoryList} />
-          <Route path="/recipes/:id" component={RecipeDetail} />
-          <Route path="/recipes" component={RecipeList} />
+          <Route path="/" element={<RecipeList />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/categories/:id" element={<CategoryDetail />} />
+          <Route path="/categories" element={<CategoryList />} />
+          <Route path="/recipes/:id" element={<RecipeDetail />} />
+          <Route path="/recipes" element={<RecipeList />} />
+
+          <Route
+            path="/recipes/create"
+            element={
+              <PrivateRoute>
+                <CreateRecipe />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/categories/create"
+            element={
+              <PrivateRoute>
+                <CreateCategory />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/categories/update/:id"
+            element={
+              <PrivateRoute>
+                <UpdateCategory />
+              </PrivateRoute>
+            }
+          />
+
         </Routes>
       </Router>
     </AuthProvider>

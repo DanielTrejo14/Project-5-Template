@@ -5,19 +5,21 @@ import axios from 'axios';
 import { AuthContext } from './AuthContext';
 
 const Navbar = () => {
+    const { logout } = useContext(AuthContext);
     const { isAuthenticated, setIsAuthenticated, setUser } = useContext(AuthContext);
     const navigate = useNavigate();
-
+    console.log(isAuthenticated)
     const handleLogout = async () => {
         try {
-            await axios.post('/logout', {}, { withCredentials: true });
+            await axios.get('http://127.0.0.1:5555/logout', { headers: { "Access-Control-Allow-Credentials": true } }, { withCredentials: true });
             setIsAuthenticated(false);
-            setUser(null);
-            navigate.push('/login');
+            logout(null);
+            navigate('/login');
         } catch (error) {
             console.error('Logout failed:', error);
         }
     };
+
 
     return (
         <nav>
@@ -25,6 +27,7 @@ const Navbar = () => {
             {isAuthenticated ? (
                 <>
                     <Link to="/recipes/create">Create Recipe</Link>
+                    <Link to="/categories">Categories</Link>
                     <button onClick={handleLogout}>Logout</button>
                 </>
             ) : (
