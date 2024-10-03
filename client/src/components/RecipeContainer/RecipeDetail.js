@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import { AuthContext } from '../AuthContext'
 const RecipeDetail = () => {
     const { user } = useContext(AuthContext);
     const { id } = useParams();
+    const navigate = useNavigate();
     const [recipe, setRecipe] = useState(null);
     const [newReview, setNewReview] = useState({ content: '', rating: 5 });
     const [error, setError] = useState(null);
@@ -70,9 +71,9 @@ const RecipeDetail = () => {
 
             <h2>Ingredients</h2>
             <ul>
-                {recipe.ingredients.map((ingredient, index) => (
-                    <li key={index}>{ingredient}</li>
-                ))}
+
+                <li>{recipe.ingredients}</li>
+
             </ul>
 
             <h2>Reviews</h2>

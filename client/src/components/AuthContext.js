@@ -8,11 +8,11 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-    const API_URL = 'http://localhost:5555'; // Set your backend URL here
+    const API_URL = 'http://localhost:5555';
 
     const fetchCurrentUser = async () => {
         try {
-            const response = await axios.get(`${API_URL}/current_user`); // Using full URL
+            const response = await axios.get(`${API_URL}/current_user`);
             setUser(response.data.user);
             setIsAuthenticated(true)
         } catch (error) {

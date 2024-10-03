@@ -10,7 +10,7 @@ const CategoryDetail = () => {
     useEffect(() => {
         const fetchCategory = async () => {
             try {
-                const response = await axios.get(`/categories/${id}`);
+                const response = await axios.get(`http://localhost:5555/categories/${id}`);
                 setCategory(response.data);
             } catch (error) {
                 setError('Error fetching category details');

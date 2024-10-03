@@ -1,34 +1,28 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const CreateRecipe = () => {
-    const { user } = useContext(AuthContext); // Using user from context
+    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
+    const [presetCats, setPresetCats] = useState([]);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        image: null,
-        ingredients: ['']
+        ingredients: [''],
+        image_url: '',
+        categories: ''
     });
     const [error, setError] = useState(null);
 
     const handleChange = (e) => {
-        const { name, value, files } = e.target;
-
-        if (name === 'image') {
-            setFormData(prevState => ({
-                ...prevState,
-                image: files[0]
-            }));
-        } else {
-            setFormData(prevState => ({
-                ...prevState,
-                [name]: value
-            }));
-        }
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
     };
 
     const handleIngredientChange = (index, value) => {
@@ -56,27 +50,50 @@ const CreateRecipe = () => {
         }));
     };
 
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get(`/categories`);
+                setPresetCats(response.data)
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+
+        fetchCategories()
+            ;
+    }, []);
+
+    const handleCategoryChange = (e) => {
+        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+        setFormData(prevState => ({
+            ...prevState,
+            categories: selectedOptions
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.title || !formData.description) {
-            setError('Title and description are required.');
+        if (!formData.title || !formData.description || !formData.image_url) {
+            setError('Title, description, and image URL are required.');
             return;
         }
 
-        const data = new FormData();
-        data.append('title', formData.title);
-        data.append('description', formData.description);
-        data.append('user_id', user.id)
-        if (formData.image) {
-            data.append('image', formData.image);
-        }
-        data.append('ingredients', JSON.stringify(formData.ingredients));
+        const data = {
+            title: formData.title,
+            description: formData.description,
+            user_id: user.id,
+            image_url: formData.image_url,
+            ingredients: formData.ingredients,
+            categories: formData.categories // Sending selected categories as an array
+        };
 
         try {
             const response = await axios.post('http://localhost:5555/recipes', data, {
                 headers: {
-                    'Content-Type': 'application/json', "Access-Control-Allow-Origin": "*"
+                    'Content-Type': 'application/json',
+                    "Access-Control-Allow-Origin": "*"
                 }
             });
             navigate(`/recipes/${response.data.recipe.id}`);
@@ -85,14 +102,13 @@ const CreateRecipe = () => {
             console.error(err);
         }
     };
-
+    const categoriesMapped = presetCats.map(categories => <option key={categories.id} value={categories.id}>{categories.name}</option>)
     return (
         <div>
             <h2>Add New Recipe</h2>
-            {user && <p>Logged in as: {user.username}</p>} {/* Display the username */}
+            {user && <p>Logged in as: {user.username}</p>}
             {error && <p>{error}</p>}
             <form onSubmit={handleSubmit}>
-                {/* Form fields for title, description, image, and ingredients */}
                 <div>
                     <label htmlFor="title">Title:</label>
                     <input
@@ -115,13 +131,14 @@ const CreateRecipe = () => {
                     />
                 </div>
                 <div>
-                    <label htmlFor="image">Image:</label>
+                    <label htmlFor="image_url">Image URL:</label>
                     <input
-                        type="file"
-                        name="image"
-                        id="image"
-                        accept="image/*"
+                        type="text"
+                        name="image_url"
+                        id="image_url"
+                        value={formData.image_url}
                         onChange={handleChange}
+                        required
                     />
                 </div>
                 <div>
@@ -148,6 +165,17 @@ const CreateRecipe = () => {
                     <button type="button" onClick={addIngredientField}>
                         Add Ingredient
                     </button>
+                </div>
+                <div>
+                    <label htmlFor="categories">Categories:</label>
+                    <select
+                        name="categories"
+                        id="categories"
+                        value={formData.categoriesMapped}
+                        onChange={handleCategoryChange}
+                    >
+                        {categoriesMapped}
+                    </select>
                 </div>
                 <button type="submit">Create Recipe</button>
             </form>

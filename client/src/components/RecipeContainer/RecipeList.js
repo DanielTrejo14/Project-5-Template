@@ -1,8 +1,7 @@
-// client/src/components/RecipeList.jsx
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios'
+import axios from 'axios';
+
 const RecipeList = () => {
     const [recipes, setRecipes] = useState([]);
     const [error, setError] = useState(null);
@@ -21,6 +20,20 @@ const RecipeList = () => {
         fetchRecipes();
     }, []);
 
+    const handleDelete = async (id) => {
+        if (window.confirm('Are you sure you want to delete this recipe?')) {
+            try {
+                await axios.delete(`http://localhost:5555/recipes/${id}`);
+                // Update the recipes state to remove the deleted recipe
+                setRecipes(recipes.filter(recipe => recipe.id !== id));
+                alert('Recipe deleted successfully');
+            } catch (err) {
+                alert(err.response?.data?.error || 'Failed to delete recipe.');
+                console.error(err);
+            }
+        }
+    };
+
     if (error) {
         return <div>Error: {error}</div>;
     }
@@ -33,6 +46,14 @@ const RecipeList = () => {
                     <li key={recipe.id} style={styles.listItem}>
                         <Link to={`/recipes/${recipe.id}`} style={styles.link}>
                             {recipe.title}
+                        </Link>
+                        <button
+                            onClick={() => handleDelete(recipe.id)}
+                            style={styles.deleteButton}>
+                            Delete
+                        </button>
+                        <Link to={`/recipes/edit/${recipe.id}`} style={styles.editButton}>
+                            Edit
                         </Link>
                     </li>
                 ))}
@@ -53,11 +74,24 @@ const styles = {
         padding: 0
     },
     listItem: {
-        marginBottom: '10px'
+        marginBottom: '10px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
     },
     link: {
         textDecoration: 'none',
-        color: '#007bff'
+        color: '#007bff',
+        flexGrow: 1
+    },
+    deleteButton: {
+        padding: '5px 10px',
+        backgroundColor: '#dc3545',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        marginLeft: '10px'
     }
 };
 

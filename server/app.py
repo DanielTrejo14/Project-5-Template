@@ -8,7 +8,7 @@ from functools import wraps
 # Local imports
 from config import app, db, api
 from models import User, Category, Review, Recipe
-import os
+import os, json
 
 
 
@@ -79,23 +79,21 @@ def logout():
 
 
 @app.route('/recipes', methods=['POST'])
+# @login_required
 def create_recipe():
+    #from models import Recipe
     data = request.get_json()
     title = data.get('title')
     description = data.get('description')
     user_id = data.get('user_id')
-    category_id = data.get('category_id')  # Capture the category_id from the request
-
+    image_url = data.get('image_url')
+    categories = data.get('categories')
+    cat = int(categories[0])
+    ingredients = data.get('ingredients')
     if not title or not description:
-        return jsonify({'error': 'Title and description are required'}), 400
+        return jsonify({'error': 'Title, description, and image URL are required'}), 400
 
-    # Find the category by its id
-    category = Category.query.get(category_id)
-    if not category:
-        return jsonify({'error': 'Category not found'}), 404
-
-    # Create the recipe with the category association
-    recipe = Recipe(title=title, description=description, user_id=user_id, category_id=category_id)
+    recipe = Recipe(title=title, description=description, user_id=user_id, image_url=image_url, categories=cat, ingredients=json.dumps(ingredients))
     db.session.add(recipe)
     db.session.commit()
     return jsonify({'message': 'Recipe created successfully', 'recipe': recipe.serialize()}), 201
@@ -111,38 +109,47 @@ def get_recipe():
 
 @app.route('/recipes/<int:id>', methods=['GET'])
 def get_recipe_by_id(id):
-    #from models import Recipe
     recipe = Recipe.query.get_or_404(id)
     return jsonify(recipe.serialize())
 
 
+@app.route('/categories/<int:id>/recipes', methods=['GET'])
+def get_recipes_by_categories(id):
+    category = Category.query.get_or_404(id)
+    recipes = category.recipes
+    return jsonify([recipe.serialize() for recipe in recipes]), 200
+
 @app.route('/recipes/<int:id>', methods=['PATCH'])
-# @login_required
 def update_recipe(id):
-    #from models import Recipe
-    recipe = Recipe.query.get_or_404(id)
-    data = request.json
+    data = request.get_json()
+    recipe = Recipe.query.get(id)
+
+    if not recipe:
+        return jsonify({'error': 'Recipe not found'}), 404
+
     recipe.title = data.get('title', recipe.title)
     recipe.description = data.get('description', recipe.description)
+    recipe.image_url = data.get('image_url', recipe.image_url)
+    recipe.ingredients = data.get('ingredients', recipe.ingredients)
+
     db.session.commit()
     return jsonify({'message': 'Recipe updated successfully', 'recipe': recipe.serialize()}), 200
 
 
 @app.route('/recipes/<int:id>', methods=['DELETE'])
-# @login_required
 def delete_recipe(id):
-    #from models import Recipe
-    recipe = Recipe.query.get_or_404(id)
-    db.session.delete(recipe)
-    db.session.commit()
-    return jsonify({'message': 'Recipe deleted successfully'}), 200
+    recipe = Recipe.query.get(id)
+    if recipe:
+        db.session.delete(recipe)
+        db.session.commit()
+        return jsonify({'message': 'Recipe deleted successfully'}), 200
+    return jsonify({'error': 'Recipe not found'}), 404
+
 
 
 @app.route('/recipes/<int:recipe_id>/favorite', methods=['POST'])
-# @login_required
 def favorite_recipe(recipe_id):
-    #from models import Recipe
-    #from models import User
+
     user_id = session['user_id']
     user = User.query.get_or_404(user_id)
     recipe = Recipe.query.get_or_404(recipe_id)
@@ -158,7 +165,6 @@ def favorite_recipe(recipe_id):
 
 
 @app.route('/categories', methods=['POST'])
-# @login_required
 def create_category():
     data = request.json
     name = data.get('name')
@@ -185,7 +191,7 @@ def get_category(id):
     if not category:
         return jsonify({'error': 'Category not found'}), 404
 
-    recipes = Recipe.query.filter_by(category_id=id).all()
+    recipes = Recipe.query.filter_by(categories=id).all()
 
     return jsonify({
         'id': category.id,
@@ -195,7 +201,6 @@ def get_category(id):
 
 
 @app.route('/categories/<int:id>', methods=['PATCH'])
-# @login_required
 def update_category(id):
     category = Category.query.get_or_404(id)
     data = request.json
@@ -212,7 +217,6 @@ def update_category(id):
     return jsonify({'message': 'Category updated successfully', 'category': category.serialize()}), 200
 
 @app.route('/categories/<int:id>', methods=['DELETE'])
-# @login_required
 def delete_category(id):
     category = Category.query.get_or_404(id)
     db.session.delete(category)
@@ -223,9 +227,7 @@ def delete_category(id):
 
 
 @app.route('/recipes/<int:recipe_id>/reviews', methods=['POST'])
-# @login_required
 def create_review(recipe_id):
-    # from models import Review
     data = request.json
     content = data.get('content')
     rating = data.get('rating')

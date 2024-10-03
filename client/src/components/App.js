@@ -14,6 +14,9 @@ import CategoryList from './CategoryContainer/CategoryList';
 import CategoryDetail from './CategoryContainer/CategoryDetail';
 import CreateCategory from './CategoryContainer/CreateCategory';
 import UpdateCategory from './CategoryContainer/UpdateCategory';
+import About from './About';
+import CategoryRecipes from './CategoryContainer/CategoryRecipes';
+import EditRecipe from './RecipeContainer/EditRecipe';
 
 function App() {
   return (
@@ -22,18 +25,27 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<RecipeList />} />
+          <Route path="/About" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/categories/:id" element={<CategoryDetail />} />
           <Route path="/categories" element={<CategoryList />} />
           <Route path="/recipes/:id" element={<RecipeDetail />} />
           <Route path="/recipes" element={<RecipeList />} />
-
+          <Route path="/categories/:id" element={<CategoryRecipes />} />
           <Route
             path="/recipes/create"
             element={
               <PrivateRoute>
                 <CreateRecipe />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/recipes/edit/:id"
+            element={
+              <PrivateRoute>
+                <EditRecipe />
               </PrivateRoute>
             }
           />
