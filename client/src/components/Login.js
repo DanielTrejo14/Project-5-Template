@@ -22,9 +22,9 @@ const Login = () => {
         const { email, password } = formData;
         const result = await login(email, password);
         if (result.success) {
-            navigate('/'); // Redirect after successful login
+            navigate('/');
         } else {
-            setError(result.message); // Set error message
+            setError(result.message);
         }
     };
 
